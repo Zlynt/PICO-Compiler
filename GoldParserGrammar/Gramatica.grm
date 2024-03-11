@@ -1,0 +1,68 @@
+"Name"  = 'PICO'
+"Author" = 'Carolina Sousa, Ivan Teixeira'
+"Version" = '1.0'
+"About" = 'Trabalho de TLC'
+"Case Sensitive" = 'False'
+"Start Symbol" = <picoBegin>
+!!!All Sets
+{Literal}           = ['('+')'+'+'+'-'+';'+'||'+':'+':=']
+!!!All Terminals
+quote               = '"'
+type                = 'natural' | 'string'
+natural             = {Digit}+
+letter              = {Letter}+
+!!!Rules
+!!Identifier
+<id> ::= letter <id_cont>
+<id_cont> ::= letter <id_cont> | natural <id_cont> | '_' <id_cont> | <>
+
+!!String Constant
+<literal>           ::= '('|')'|'+'|'-'|';'|'||'|':'|':='
+!!If the string contains reserved words like "for", the parser will identify has an error. So, we need to escape this reserved words inside string
+<string_escape>     ::= 'declare' | 'if' | 'the' | 'else' | 'fi' | 'for' | 'do' | 'od' | 'begin' | 'end' | 'while'
+<string_data>       ::= natural <string_data> | letter <string_data> | <literal> <string_data> | <string_escape> <string_data> | <> 
+<string_constant>   ::= quote <string_data> quote
+
+!!Operations
+!Plus Operation
+<plus>              ::= <exp> '+' <primary>
+!Minus Operation
+<minus>             ::= <exp> '-' <primary>
+!Concatenation
+<conc>              ::= <exp> '||' <primary>
+!Fewer Operation
+<fewer>             ::= <exp> '<' <primary>
+!Higher Operation
+<higher>            ::= <exp> '>' <primary>
+
+!!Equals Operation
+!<equals>            ::= <exp> '==' <primary>
+!<notEqual>          ::= <exp> '!=' <primary>
+!<and>               ::= <exp> '&&' <primary>
+
+!Assign certain data to a variable
+<assign>            ::= <id>    ':=' <exp>
+!Declare a variable
+<declarations>      ::= <id> ':' type ',' <declarations> | <id> ':' type 
+<declare>           ::= 'declare' <declarations> ';'
+
+!!Base expression
+
+!Expression
+<exp>               ::= <primary> | <plus> | <minus> | <conc> | <fewer> | <higher> 
+!Data
+<primary>           ::= <id>  | natural | <string_constant> | '(' <exp> ')'
+!If Sentence
+<if>                ::= 'if' <exp> 'then' <series> <if_else>
+<if_else>           ::= 'else' <series> 'fi' | 'fi'
+!For Cicle
+<for_data>          ::= <exp> | <assign>
+<for>               ::= 'for' <for_data> ';' <for_data> ';' <for_data> 'do' <series> 'od'
+!While Cicle
+<while>             ::= 'while' <exp> 'do' <series> 'od'
+
+!Heart of the code itself
+<series>            ::= <assign> ';' <series> | <if> <series> | <for> <series> | <while> <series> | <>
+
+
+<picoBegin>       ::= 'begin' <declare> <series> 'end'
